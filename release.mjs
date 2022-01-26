@@ -89,11 +89,11 @@ async function makeRelease() {
 
   
   // Tag the current commit.
-  log(`Add git tag ${tagName} with message: ${tagMessage}`);
+  log(`Add git tag ${chalk.green(tagName)} with message: ${chalk.green(tagMessage)}`);
   await $`git tag -a ${tagName} -m "${tagMessage}"`;
 
   // Push the commit and the tag to the remote.
-  log(`Push the commit and tag to origin ${releaseBranch}`);
+  log(`Push the commit and tag to origin ${chalk.green(releaseBranch)}`);
   await $`git push --atomic origin ${releaseBranch} ${tagName}`;
 }
 
