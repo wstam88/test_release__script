@@ -75,7 +75,7 @@ async function makeRelease() {
     choices: ['yes', 'no'],
   })
 
-  if(proceed === 'no') {
+  if (proceed === 'no') {
     exitWithError('Aborting release.')
   }
 
