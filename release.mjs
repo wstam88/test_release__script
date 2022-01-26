@@ -96,7 +96,8 @@ async function makeRelease() {
 
     // Push git tag
     log(`Push the ${tagName} tag to origin`)
-    await $`git push --tags`
+    // await $`git push --tags`
+    await $`git push --atomic origin master "${tagName}" -m "${tagMessage}"`
   }
 }
 
