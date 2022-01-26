@@ -11,7 +11,7 @@ $.verbose = false;
 $.debug = false;
 
 const releaseBranch = "master";
-const log = console.log;
+const { log } = console;
 
 /**
  * Ask some questions about the release
@@ -86,7 +86,6 @@ async function makeRelease() {
 
   await $`git add package.json`;
   await $`git commit -m "${tagName}"`;
-
   
   // Tag the current commit.
   log(`Add git tag ${chalk.green(tagName)} with message: ${chalk.green(tagMessage)}`);
