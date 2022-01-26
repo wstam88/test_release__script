@@ -68,7 +68,9 @@ log(`New release version: ${chalk.green(tagName)}\n`)
  * Make a release of the project.
  */
 async function makeRelease() {
-  const answer = await question('Are you sure you want to release?', 'y')
+  const answer = await question('Are you sure you want to release?', {
+    choices: ['yes', 'no'],
+  })
 
   exitWithError(answer)
 
