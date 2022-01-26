@@ -96,7 +96,7 @@ async function makeRelease() {
     /**
      * Push the commit and the tag to the remote.
      */
-    log(`Push the commit and the ${tagName} tag to origin ${releaseBranch}`)
+    log(`Push the commit and tag to origin ${releaseBranch}`)
     await $`git push --atomic origin ${releaseBranch} ${tagName}`
   }
 }
