@@ -67,8 +67,8 @@ if ((await $`git diff FETCH_HEAD`).stdout.trim()) {
   exitWithError('Local repository contains unpushed commits, abort the release.')
 }
 
-log(`Previous released version: ${currentRelease}\n`)
-log(`New release version: ${tagName}`)
+log(`Previous released version: ${currentRelease}`)
+log(`New release version: ${tagName}\n`)
 
 /**
  * Make a release of the project.
