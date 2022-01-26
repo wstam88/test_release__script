@@ -1,6 +1,6 @@
 {
   "name": "test_release_script",
-  "version": "2.4.0-0",
+  "version": "2.4.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/wstam88/test_release__script#readme",
   "devDependencies": {
-    "inquirer": "^8.2.0"
+    "inquirer": "^8.2.0",
+    "semver": "^7.3.5",
+    "zx": "^4.3.0"
   }
 }
