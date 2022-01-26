@@ -15,10 +15,10 @@ const { log } = console
 /**
  * Ask some questions about the release
  */
-const { release_type } = await inquirer.prompt([
+const { releaseType } = await inquirer.prompt([
   {
     type: 'list',
-    name: 'release_type',
+    name: 'releaseType',
     message: 'Which release type?',
     choices: ['patch', 'minor'],
     required: true,
@@ -31,7 +31,7 @@ const previousReleasedVersion = (
 
 const previousReleaseName = `Release-${previousReleasedVersion}`
 const currentBranch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim()
-const nextVersion = semverInc(previousReleasedVersion, release_type)
+const nextVersion = semverInc(previousReleasedVersion, releaseType)
 const tagName = `Release-${nextVersion}`
 const tagMessage = `FEA-${nextVersion}`
 
@@ -68,14 +68,12 @@ log(`New release version: ${chalk.green(tagName)}\n`)
  * Make a release of the project.
  */
 async function makeRelease() {
-  const { proceed } = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'proceed',
-      message: 'Are you sure you want to release?',
-      choices: ['yes', 'no'],
-    }
-  ])
+  const { proceed } = await inquirer.prompt({
+    type: 'list',
+    name: 'proceed',
+    message: `Are you sure you want to release (${releaseType}) ${tagName}?`,
+    choices: ['yes', 'no'],
+  })
 
   if(proceed === 'no') {
     exitWithError('Aborting release.')
