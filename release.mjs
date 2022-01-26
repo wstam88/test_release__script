@@ -82,7 +82,7 @@ async function makeRelease() {
   await $`git pull origin ${releaseBranch}`
 
   if ((await $`git tag -l --points-at HEAD`).stdout) {
-    exitWithError('There is already a tag on this commit. Skipping.')
+    exitWithError('There is already a tag on this commit. Skipping...')
   }
 
   setPackageVersion(nextVersion)
