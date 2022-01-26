@@ -55,7 +55,7 @@ if (currentBranch !== 'master') {
 /**
  * There should be no uncommitted changes.
  */
-if (await $`git status -s`) {
+if ((await $`git status -s`).stdout.trim()) {
   log('There are uncommitted changes. Please commit or stash them before continuing.')
     exit(1)
 }
