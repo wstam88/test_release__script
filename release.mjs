@@ -54,7 +54,7 @@ const log = console.log
  */
 if (currentBranch !== releaseBranch) {
   log(`You are not on the ${releaseBranch} branch. Please switch to the ${releaseBranch} branch before continuing.`)
-    exit(1)
+    process.exit(1)
 }
 
 /**
@@ -62,7 +62,7 @@ if (currentBranch !== releaseBranch) {
  */
 if ((await $`git status -s`).stdout.trim()) {
   log('There are uncommitted changes. Please commit or stash them before continuing.')
-    exit(1)
+    process.exit(1)
 }
 
 /**
@@ -70,7 +70,7 @@ if ((await $`git status -s`).stdout.trim()) {
  */
 if ((await $`git diff FETCH_HEAD`).stdout.trim()) {
   log('Local repository contains unpushed commits, abort the release.')
-    exit(1)
+    process.exit(1)
 }
 
 log(`Previous released version: ${currentRelease}\n`)
@@ -93,7 +93,7 @@ async function makeRelease() {
 
   if (tagOnCurrentCommit) {
     log('There is already a tag on this commit. Skipping...')
-    exit(1)
+    process.exit(1)
   } else {
     /**
      * Tag the current commit.
@@ -110,11 +110,15 @@ async function makeRelease() {
 }
 
 /**
- * Update the package.json version number to the new one.
+ * Update the package.json version number to the new one...
  */
 function setPackageVersion(version) {
   packageInfo.version = version
   fs.writeFileSync('./package.json', JSON.stringify(packageInfo, null, 2))
 }
 
+
+/**
+ * Run the release.
+ */
 makeRelease()
