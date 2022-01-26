@@ -4,13 +4,14 @@ import "zx/globals";
 import inquirer from "inquirer";
 import semverInc from "semver/functions/inc.js";
 
-const packageInfo = require("./package.json");
-const log = console.log;
-
 /**
  * Set options for zx.
  */
 $.verbose = false;
+$.debug = false;
+
+const releaseBranch = "master";
+const log = console.log;
 
 /**
  * Ask some questions about the release
@@ -25,14 +26,13 @@ const { release_type } = await inquirer.prompt([
   },
 ]);
 
-const lastReleasedVersion = (
+const previousReleasedVersion = (
   await $`git describe --tags $(git rev-list --tags --max-count=1) | sed -r 's/Release-//g'`
 ).stdout.trim();
 
-const releaseBranch = "master";
-const currentRelease = `Release-${lastReleasedVersion}`;
+const previousReleaseName = `Release-${previousReleasedVersion}`;
 const currentBranch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim();
-const nextVersion = semverInc(lastReleasedVersion, release_type);
+const nextVersion = semverInc(previousReleasedVersion, release_type);
 const tagName = `Release-${nextVersion}`;
 const tagMessage = `FEA-${nextVersion}`;
 
@@ -68,7 +68,7 @@ if ((await $`git diff FETCH_HEAD`).stdout.trim()) {
   );
 }
 
-log(`Previous released version: ${chalk.green(currentRelease)}`);
+log(`Previous released version: ${chalk.green(previousReleaseName)}`);
 log(`New release version: ${chalk.green(tagName)}\n`);
 
 /**
@@ -101,6 +101,7 @@ async function makeRelease() {
  * Update the package.json version number to the new one...
  */
 function setPackageVersion(version) {
+  const packageInfo = require("./package.json");
   packageInfo.version = version;
   fs.writeFileSync("./package.json", JSON.stringify(packageInfo, null, 2));
 }
