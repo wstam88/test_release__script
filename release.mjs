@@ -1,6 +1,5 @@
-#!/usr/bin/env zx
 /* eslint-disable */
-// import "zx/globals";
+import "zx/globals";
 import inquirer from "inquirer";
 import semverInc from "semver/functions/inc.js";
 
