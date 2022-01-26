@@ -6,11 +6,13 @@ import inquirer from 'inquirer'
 import semverInc from 'semver/functions/inc.js'
 
 const packageInfo = require('./package.json')
+const log = console.log
 
 /**
  * Set options for zx.
  */
 $.verbose = false
+
 
 /**
  * Ask some questions about the release
@@ -25,14 +27,10 @@ const { release_type } = await inquirer.prompt([
   },
 ])
 
-/**
- * 
- */
-const revList = await $`git rev-list --tags --max-count=1`
+
 const lastReleasedVersion = (
-  await $`git describe --tags ${revList} | sed -r 's/Release-//g'`
+  await $`git describe --tags $(git rev-list --tags --max-count=1) | sed -r 's/Release-//g'`
 ).stdout.trim()
-const currentPackageVersion = packageInfo.version
 
 const releaseBranch = 'master'
 const currentRelease = `Release-${lastReleasedVersion}`
@@ -41,7 +39,6 @@ const nextVersion = semverInc(lastReleasedVersion, release_type)
 const tagName = `Release-${nextVersion}`
 const tagMessage = `FEA-${nextVersion}`
 
-const log = console.log
 
 
 /**
@@ -53,29 +50,25 @@ const log = console.log
  * Make sure we are on the release branch.
  */
 if (currentBranch !== releaseBranch) {
-  log(`You are not on the ${releaseBranch} branch. Please switch to the ${releaseBranch} branch before continuing.`)
-    process.exit(1)
+  exitWithError(`Please switch to the ${releaseBranch} branch before continuing.`)
 }
 
 /**
  * There should be no uncommitted changes.
  */
 if ((await $`git status -s`).stdout.trim()) {
-  log('There are uncommitted changes. Please commit or stash them before continuing.')
-    process.exit(1)
+  exitWithError('There are uncommitted changes. Please commit or stash them before continuing.')
 }
 
 /**
  * There should be no unpushed changes.
  */
 if ((await $`git diff FETCH_HEAD`).stdout.trim()) {
-  log('Local repository contains unpushed commits, abort the release.')
-    process.exit(1)
+  exitWithError('Local repository contains unpushed commits, abort the release.')
 }
 
 log(`Previous released version: ${currentRelease}\n`)
-log(`Tag name: ${tagName}`)
-log(`Tag message: ${tagMessage}\n`)
+log(`New release version: ${tagName}`)
 
 /**
  * Make a release of the project.
@@ -92,8 +85,7 @@ async function makeRelease() {
   const tagOnCurrentCommit = (await $`git tag -l --points-at HEAD`).stdout
 
   if (tagOnCurrentCommit) {
-    log('There is already a tag on this commit. Skipping...')
-    process.exit(1)
+    exitWithError('There is already a tag on this commit. Skipping...')
   } else {
     /**
      * Tag the current commit.
@@ -104,7 +96,7 @@ async function makeRelease() {
     /**
      * Push the commit and the tag to the remote.
      */
-    log(`Push commit and the ${tagName} tag to origin ${releaseBranch}`)
+    log(`Push the commit and the ${tagName} tag to origin ${releaseBranch}`)
     await $`git push --atomic origin ${releaseBranch} ${tagName}`
   }
 }
@@ -117,6 +109,13 @@ function setPackageVersion(version) {
   fs.writeFileSync('./package.json', JSON.stringify(packageInfo, null, 2))
 }
 
+/**
+ * Exit with an error. 
+ */
+function exitWithError(errorMessage) {
+  console.error(chalk.red(errorMessage));
+  process.exit(1);
+}
 
 /**
  * Run the release.
