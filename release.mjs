@@ -68,8 +68,8 @@ if ((await $`git diff FETCH_HEAD`).stdout.trim()) {
   );
 }
 
-log(`Previous released version: ${currentRelease}`);
-log(`New release version: ${tagName}\n`);
+log(`Previous released version: ${chalk.green(currentRelease)}`);
+log(`New release version: ${chalk.green(tagName)}\n`);
 
 /**
  * Make a release of the project.
