@@ -1,9 +1,10 @@
 #!/usr/bin/env zx
+
 /* eslint-disable */
 import 'zx/globals'
 import inquirer from 'inquirer'
 import semverInc from 'semver/functions/inc.js'
-import { exit } from 'process'
+
 const packageInfo = require('./package.json')
 
 /**
@@ -12,7 +13,7 @@ const packageInfo = require('./package.json')
 $.verbose = false
 
 /**
- * Package.json information
+ * Ask some questions about the release
  */
 const { release_type } = await inquirer.prompt([
   {
@@ -24,14 +25,16 @@ const { release_type } = await inquirer.prompt([
   },
 ])
 
-await $`git fetch --quiet --tags origin`
-
+/**
+ * 
+ */
 const revList = await $`git rev-list --tags --max-count=1`
 const lastReleasedVersion = (
   await $`git describe --tags ${revList} | sed -r 's/Release-//g'`
 ).stdout.trim()
 const currentPackageVersion = packageInfo.version
 
+const releaseBranch = 'master'
 const currentRelease = `Release-${lastReleasedVersion}`
 const currentBranch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim()
 const nextVersion = semverInc(lastReleasedVersion, release_type)
@@ -41,14 +44,16 @@ const tagMessage = `FEA-${nextVersion}`
 const log = console.log
 
 
-log(currentBranch)
+/**
+ * Fetch all tags from the remote in addition to whatever else would otherwise be fetched.
+ */
+ await $`git fetch --quiet --tags origin`
 
 /**
- * We should be on the master branch
- * ...of course we could switch to the master branch automaticlly?
+ * Make sure we are on the release branch.
  */
-if (currentBranch !== 'master') {
-  log('You are not on the master branch. Please switch to the master branch before continuing.')
+if (currentBranch !== releaseBranch) {
+  log(`You are not on the ${releaseBranch} branch. Please switch to the ${releaseBranch} branch before continuing.`)
     exit(1)
 }
 
@@ -61,7 +66,7 @@ if ((await $`git status -s`).stdout.trim()) {
 }
 
 /**
- * There should be no uncommitted changes.
+ * There should be no unpushed changes.
  */
 if ((await $`git diff FETCH_HEAD`).stdout.trim()) {
   log('Local repository contains unpushed commits, abort the release.')
@@ -76,8 +81,8 @@ log(`Tag message: ${tagMessage}\n`)
  * Make a release of the project.
  */
 async function makeRelease() {
-  await $`git checkout master`
-  await $`git pull origin master`
+  await $`git checkout ${releaseBranch}`
+  await $`git pull origin ${releaseBranch}`
 
   setPackageVersion(nextVersion)
 
@@ -90,19 +95,22 @@ async function makeRelease() {
     log('There is already a tag on this commit. Skipping...')
     exit(1)
   } else {
-    // Add git tag
+    /**
+     * Tag the current commit.
+     */
     log(`Add git tag ${tagName} with message: ${tagMessage}`)
     await $`git tag -a ${tagName} -m "${tagMessage}"`
 
-    // Push git tag
-    log(`Push the ${tagName} tag to origin`)
-    // await $`git push --tags`
-    await $`git push --atomic origin master ${tagName}`
+    /**
+     * Push the commit and the tag to the remote.
+     */
+    log(`Push commit and the ${tagName} tag to origin ${releaseBranch}`)
+    await $`git push --atomic origin ${releaseBranch} ${tagName}`
   }
 }
 
 /**
- * Update the package.json version.
+ * Update the package.json version number to the new one.
  */
 function setPackageVersion(version) {
   packageInfo.version = version
