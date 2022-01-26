@@ -73,7 +73,7 @@ if ((await $`git diff FETCH_HEAD`).stdout.trim()) {
     exit(1)
 }
 
-log(`Current version: ${currentRelease}`)
+log(`Previous released version: ${currentRelease}\n`)
 log(`Tag name: ${tagName}`)
 log(`Tag message: ${tagMessage}\n`)
 
