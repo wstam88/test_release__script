@@ -71,7 +71,7 @@ async function makeRelease() {
   const { proceed } = await inquirer.prompt({
     type: 'list',
     name: 'proceed',
-    message: `Are you sure you want to release (${releaseType}) ${tagName}?`,
+    message: `Are you sure you want to release ${tagName}?`,
     choices: ['yes', 'no'],
   })
 
