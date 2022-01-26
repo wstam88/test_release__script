@@ -68,11 +68,18 @@ log(`New release version: ${chalk.green(tagName)}\n`)
  * Make a release of the project.
  */
 async function makeRelease() {
-  const answer = await question('Are you sure you want to release?', {
-    choices: ['yes', 'no'],
-  })
+  const { proceed } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'proceed',
+      message: 'Are you sure you want to release?',
+      choices: ['yes', 'no'],
+    }
+  ])
 
-  exitWithError(answer)
+  if(proceed === 'no') {
+    exitWithError('Aborting release.')
+  }
 
   await $`git pull origin ${releaseBranch}`
 
