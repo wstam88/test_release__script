@@ -82,7 +82,7 @@ async function makeRelease() {
   setPackageVersion(nextVersion)
 
   await $`git add package.json`
-  await $`git commit -m "${tagName}"`
+  // await $`git commit -m "${tagName}"`
 
   const tagOnCurrentCommit = (await $`git tag -l --points-at HEAD`).stdout
 
