@@ -63,7 +63,7 @@ if ((await $`git status -s`).stdout.trim()) {
 /**
  * There should be no uncommitted changes.
  */
-if (await 'git diff FETCH_HEAD') {
+if (await 'git diff FETCH_HEAD'.stdout.trim()) {
   log('Local repository contains unpushed commits, abort the release.')
     exit(1)
 }
