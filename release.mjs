@@ -78,7 +78,7 @@ async function makeRelease() {
   await $`git checkout ${releaseBranch}`;
   await $`git pull origin ${releaseBranch}`;
 
-  if (await $`git tag -l --points-at HEAD`.stdout) {
+  if ((await $`git tag -l --points-at HEAD`).stdout) {
     exitWithError("There is already a tag on this commit. Skipping...");
   }
 
