@@ -12,7 +12,7 @@ $.debug = false;
 const { log } = console;
 
 let currentBranch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim();
-const preferedReleaseBranches = ["main", "master", currentBranch];
+const preferedReleaseBranches = ["master", "main", currentBranch];
 const branchList = (await $`git branch -r`).stdout
   .split("\n")
   .map((branch) => branch.replace(/\s+|\s+|origin\//g, ""));
