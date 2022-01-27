@@ -52,6 +52,7 @@ const tagMessage = `FEA-${nextVersion}`;
  */
 await $`git fetch --quiet --tags origin ${releaseBranch}`;
 
+
 /**
  * There should be no uncommitted changes.
  */
@@ -64,11 +65,12 @@ if ((await $`git status -s`).stdout.trim()) {
 /**
  * Make sure we are on the release branch.
  */
-if (currentBranch !== releaseBranch) {
+ if (currentBranch !== releaseBranch) {
   await $`git checkout ${releaseBranch}`;
-  if (
-    (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim() !== releaseBranch
-  ) {
+  
+  currentBranch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim();
+
+  if (currentBranch !== releaseBranch) {
     exitWithError(`Could not checkout ${releaseBranch}`);
   }
 }
@@ -96,7 +98,7 @@ async function makeRelease() {
     message: [
       `Are you sure you want to release branch`,
       `${chalk.green(currentBranch)} as ${chalk.green(tagName)}?`,
-    ].join(' '),
+    ].join(" "),
     choices: ["yes", "no"],
   });
 
