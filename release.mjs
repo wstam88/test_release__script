@@ -62,6 +62,16 @@ if ((await $`git status -s`).stdout.trim()) {
 }
 
 /**
+ * Make sure we are on the release branch.
+ */
+ if (currentBranch !== releaseBranch) {
+  await $`git checkout ${releaseBranch}`;
+  if((await $`git rev-parse --abbrev-ref HEAD`).stdout.trim() !== releaseBranch) {
+    exitWithError(`Could not checkout ${releaseBranch}`);
+  }
+}
+
+/**
  * There should be no unpushed changes.
  */
 if ((await $`git diff FETCH_HEAD`).stdout.trim()) {
@@ -70,15 +80,7 @@ if ((await $`git diff FETCH_HEAD`).stdout.trim()) {
   );
 }
 
-/**
- * Make sure we are on the release branch.
- */
-if (currentBranch !== releaseBranch) {
-  await $`git checkout ${releaseBranch}`;
-  if((await $`git rev-parse --abbrev-ref HEAD`).stdout.trim() !== releaseBranch) {
-    exitWithError(`Could not checkout ${releaseBranch}`);
-  }
-}
+
 
 log(`Release branch: ${chalk.green(releaseBranch)}`);
 log(`Previous released version: ${chalk.green(previousReleaseName)}`);
