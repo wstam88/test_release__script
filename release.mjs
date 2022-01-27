@@ -15,7 +15,7 @@ $.debug = false
 
 const { log } = console
 
-const branches = (await $`git branch -r`).stdout.split('\n').map(branch => branch.replace(/^\s+|\s+$/g, ''))
+const branches = (await $`git branch -r`).stdout.split('\n').map(branch => branch.replace(/^\s+|\s+|origin\/$/g, ''))
 /**
  * Ask some questions about the release
  */
