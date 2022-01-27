@@ -12,15 +12,14 @@ inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 $.verbose = false
 $.debug = false
 
-const releaseBranch = 'master'
-const { log } = console
 
+const { log } = console
 const branches = (await $`git branch -r`).stdout.split('\n').map(branch => branch.replace(/^\s+|\s+$/g, ''))
 
 /**
  * Ask some questions about the release
  */
-const { releaseType } = await inquirer.prompt([
+const { releaseType, releaseBranch } = await inquirer.prompt([
   {
     type: 'list',
     name: 'releaseType',
@@ -51,7 +50,7 @@ const tagMessage = `FEA-${nextVersion}`
 /**
  * Fetch all tags from the remote in addition to whatever else would otherwise be fetched.
  */
-await $`git fetch --quiet --tags origin ${releaseBranch}`
+await $`git fetch --quiet --tags ${releaseBranch}`
 
 /**
  * Make sure we are on the release branch.
@@ -92,7 +91,7 @@ async function makeRelease() {
     exitWithError('Aborting release.')
   }
 
-  await $`git pull origin ${releaseBranch}`
+  await $`git pull ${releaseBranch}`
 
   if ((await $`git tag -l --points-at HEAD`).stdout) {
     exitWithError('There is already a tag on this commit. Skipping...')
@@ -109,8 +108,8 @@ async function makeRelease() {
   await $`git tag -a ${tagName} -m "${tagMessage}"`
 
   // Push the commit and the tag to the remote.
-  log(`Push the commit and tag to origin ${chalk.green(releaseBranch)}\n`)
-  await $`git push --atomic origin ${releaseBranch} ${tagName}`
+  log(`Push the commit and tag to ${chalk.green(releaseBranch)}\n`)
+  await $`git push --atomic ${releaseBranch} ${tagName}`
 
   log(`🚀 Release ${chalk.green(tagName)} successfully created.`)
 }
