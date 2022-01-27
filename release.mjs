@@ -50,7 +50,7 @@ const tagMessage = `FEA-${nextVersion}`
 /**
  * Fetch all tags from the remote in addition to whatever else would otherwise be fetched.
  */
-await $`git fetch --quiet --tags origin ${releaseBranch}`
+await $`git fetch --quiet --tags ${releaseBranch}`
 
 /**
  * Make sure we are on the release branch.
