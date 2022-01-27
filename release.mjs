@@ -12,9 +12,19 @@ $.debug = false;
 const { log } = console;
 
 const currentBranch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim();
+const preferedReleaseBranches = ["main", "master", currentBranch];
 const branchList = (await $`git branch -r`).stdout
   .split("\n")
   .map((branch) => branch.replace(/\s+|\s+|origin\//g, ""));
+
+/**
+ * Get the first prefered release branch that exists.
+ */
+function getPreferedReleaseBranch() {
+  return branchList.find((branch) =>
+    preferedReleaseBranches.includes(branch)
+  );
+}
 
 /**
  * Ask some questions about the release
@@ -33,7 +43,7 @@ const { releaseType, releaseBranch } = await inquirer.prompt([
     message: "Which branch to release?",
     choices: branchList,
     required: true,
-    default: currentBranch,
+    default: getPreferedReleaseBranch(),
     validate: (branch) => branchList.includes(branch),
   },
 ]);
@@ -92,6 +102,9 @@ log(`New release version: ${chalk.green(tagName)}\n`);
  * Make a release of the project.
  */
 async function makeRelease() {
+  /**
+   * Verify that the user is ready to release.
+   */
   const { proceed } = await inquirer.prompt({
     type: "list",
     name: "proceed",
@@ -106,19 +119,29 @@ async function makeRelease() {
     exitWithError("Aborting release.");
   }
 
+  /**
+   * Pull the latest changes from the remote.
+   */
   await $`git pull origin ${releaseBranch}`;
 
+  /**
+   * Make sure there isn't already a tag created.
+   */
   if ((await $`git tag -l --points-at HEAD`).stdout) {
     exitWithError("There is already a tag on this commit. Skipping...");
   }
 
-  setPackageVersion(nextVersion);
-
-  await $`git add package.json`;
+  /**
+   * Bump the version in package.json and package-lock.json and commit them.
+   */
+  log(`Bump project version in package.json to ${chalk.green(nextVersion)}.`);
+  await $`npm --no-git-tag-version version ${nextVersion}`;
+  await $`git add package.json package-lock.json`;
   await $`git commit -m "${tagName}"`;
-  log(`Bumped project version in package.json to ${chalk.green(nextVersion)}.`);
 
-  // Tag the current commit.
+  /**
+   * Create a new tag
+   */
   log(
     `Add git tag ${chalk.green(tagName)} with message: ${chalk.green(
       tagMessage
@@ -126,20 +149,16 @@ async function makeRelease() {
   );
   await $`git tag -a ${tagName} -m "${tagMessage}"`;
 
-  // Push the commit and the tag to the remote.
+  /**
+   * Push the commit and tag to the remote.
+   */
   log(`Push the commit and tag to origin ${chalk.green(releaseBranch)}\n`);
   await $`git push --atomic origin ${releaseBranch} ${tagName}`;
 
+  /**
+   * Hoeray! Release created successfully.
+   */
   log(`🚀 Release ${chalk.green(tagName)} successfully created.`);
-}
-
-/**
- * Update the package.json version number to the new one...
- */
-function setPackageVersion(version) {
-  const packageInfo = require("./package.json");
-  packageInfo.version = version;
-  fs.writeFileSync("./package.json", JSON.stringify(packageInfo, null, 2));
 }
 
 /**
