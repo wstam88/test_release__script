@@ -30,7 +30,7 @@ const { releaseType } = await inquirer.prompt([
     type: 'autocomplete',
     name: 'releaseBranch',
     message: 'Which branch to release?',
-    choices: await $`git branch -r`,
+    source: await $`git branch -r`
   }
 ])
 
