@@ -83,7 +83,7 @@ async function makeRelease() {
   const { proceed } = await inquirer.prompt({
     type: 'list',
     name: 'proceed',
-    message: `Are you sure you want to release ${tagName}?`,
+    message: `Are you sure you want to release branch ${chalk.green(releaseBranch)} as ${tagName}?`,
     choices: ['yes', 'no'],
   })
 
