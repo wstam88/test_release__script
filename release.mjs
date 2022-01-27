@@ -15,6 +15,8 @@ $.debug = false
 const releaseBranch = 'master'
 const { log } = console
 
+const branches = (await $`git branch -r`).stdout.split('\n').map(branch => branch.replace(/^\s+|\s+$/g, ''))
+
 /**
  * Ask some questions about the release
  */
@@ -27,10 +29,12 @@ const { releaseType } = await inquirer.prompt([
     required: true,
   },
   {
-    type: 'autocomplete',
+    type: 'list',
     name: 'releaseBranch',
     message: 'Which branch to release?',
-    source: await $`git branch -r`
+    choices: branches,
+    required: true,
+    validate: branch => branches.includes(branch),
   }
 ])
 
