@@ -53,13 +53,6 @@ const tagMessage = `FEA-${nextVersion}`
 await $`git fetch --quiet --tags origin ${releaseBranch}`
 
 /**
- * Make sure we are on the release branch.
- */
-if (currentBranch !== releaseBranch) {
-  exitWithError(`Please switch to the ${releaseBranch} branch before continuing.`)
-}
-
-/**
  * There should be no uncommitted changes.
  */
 if ((await $`git status -s`).stdout.trim()) {
@@ -71,6 +64,13 @@ if ((await $`git status -s`).stdout.trim()) {
  */
 if ((await $`git diff FETCH_HEAD`).stdout.trim()) {
   exitWithError('Local repository contains unpushed commits, abort the release.')
+}
+
+/**
+ * Make sure we are on the release branch.
+ */
+ if (currentBranch !== releaseBranch) {
+   await $`git checkout ${releaseBranch}`
 }
 
 log(`Previous released version: ${chalk.green(previousReleaseName)}`)
