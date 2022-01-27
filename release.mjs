@@ -31,7 +31,7 @@ const { releaseType } = await inquirer.prompt([
   {
     type: 'list',
     name: 'releaseBranch',
-    message: 'Which branch to release?',
+    message: 'Which branch to release??',
     choices: branches,
     required: true,
     validate: branch => branches.includes(branch),
