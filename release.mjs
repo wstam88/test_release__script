@@ -64,9 +64,11 @@ if ((await $`git status -s`).stdout.trim()) {
 /**
  * Make sure we are on the release branch.
  */
- if (currentBranch !== releaseBranch) {
+if (currentBranch !== releaseBranch) {
   await $`git checkout ${releaseBranch}`;
-  if((await $`git rev-parse --abbrev-ref HEAD`).stdout.trim() !== releaseBranch) {
+  if (
+    (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim() !== releaseBranch
+  ) {
     exitWithError(`Could not checkout ${releaseBranch}`);
   }
 }
@@ -80,8 +82,6 @@ if ((await $`git diff FETCH_HEAD`).stdout.trim()) {
   );
 }
 
-
-
 log(`Release branch: ${chalk.green(releaseBranch)}`);
 log(`Previous released version: ${chalk.green(previousReleaseName)}`);
 log(`New release version: ${chalk.green(tagName)}\n`);
@@ -93,7 +93,10 @@ async function makeRelease() {
   const { proceed } = await inquirer.prompt({
     type: "list",
     name: "proceed",
-    message: `Are you sure you want to release ${tagName}?`,
+    message: [
+      `Are you sure you want to release branch`,
+      `${chalk.green(currentBranch)} as ${chalk.green(tagName)}?`,
+    ].join(' '),
     choices: ["yes", "no"],
   });
 
