@@ -22,5 +22,8 @@
     "inquirer": "^8.2.0",
     "semver": "^7.3.5",
     "zx": "^4.3.0"
+  },
+  "dependencies": {
+    "inquirer-autocomplete-prompt": "^1.4.0"
   }
 }

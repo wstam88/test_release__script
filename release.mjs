@@ -3,6 +3,9 @@ import 'zx/globals'
 import inquirer from 'inquirer'
 import semverInc from 'semver/functions/inc.js'
 
+inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
+
+
 /**
  * Set options for zx.
  */
@@ -23,6 +26,12 @@ const { releaseType } = await inquirer.prompt([
     choices: ['patch', 'minor'],
     required: true,
   },
+  {
+    type: 'autocomplete',
+    name: 'releaseBranch',
+    message: 'Which branch to release?',
+    choices: await $`git branch -r`,
+  }
 ])
 
 const previousReleasedVersion = (
