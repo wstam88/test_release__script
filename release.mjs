@@ -15,6 +15,7 @@ $.debug = false
 const releaseBranch = 'master'
 const { log } = console
 
+const currentBranch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim()
 const branches = (await $`git branch -r`).stdout.split('\n').map(branch => branch.replace(/^\s+|\s+$/g, ''))
 
 /**
@@ -29,11 +30,12 @@ const { releaseType } = await inquirer.prompt([
     required: true,
   },
   {
-    type: 'list',
+    type: 'input',
     name: 'releaseBranch',
     message: 'Which branch to release?',
     choices: branches,
     required: true,
+    default: currentBranch,
     validate: branch => branches.includes(branch),
   }
 ])
@@ -43,7 +45,6 @@ const previousReleasedVersion = (
 ).stdout.trim()
 
 const previousReleaseName = `Release-${previousReleasedVersion}`
-const currentBranch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim()
 const nextVersion = semverInc(previousReleasedVersion, releaseType)
 const tagName = `Release-${nextVersion}`
 const tagMessage = `FEA-${nextVersion}`
