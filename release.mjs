@@ -11,7 +11,7 @@ $.debug = false;
 
 const { log } = console;
 
-const currentBranch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim();
+let currentBranch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim();
 const preferedReleaseBranches = ["main", "master", currentBranch];
 const branchList = (await $`git branch -r`).stdout
   .split("\n")
