@@ -40,7 +40,7 @@ const { releaseType, releaseBranch } = await inquirer.prompt([
   {
     type: "list",
     name: "releaseBranch",
-    message: "Which branch to release??",
+    message: "Which branch to release?",
     choices: branchList,
     required: true,
     default: getPreferedReleaseBranch(),
