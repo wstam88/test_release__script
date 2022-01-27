@@ -109,8 +109,8 @@ async function makeRelease() {
     type: "list",
     name: "proceed",
     message: [
-      `Are you sure you want to release branch`,
-      `${chalk.green(currentBranch)} as ${chalk.green(tagName)}?`,
+      `Are you sure you want to release the`,
+      `${chalk.green(currentBranch)} branch as ${chalk.green(tagName)}?`,
     ].join(" "),
     choices: ["yes", "no"],
   });
