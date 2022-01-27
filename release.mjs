@@ -3,19 +3,19 @@ import 'zx/globals'
 import inquirer from 'inquirer'
 import semverInc from 'semver/functions/inc.js'
 
-inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
-
-
 /**
  * Set options for zx.
  */
 $.verbose = false
 $.debug = false
 
-
 const { log } = console
 
-const branches = (await $`git branch -r`).stdout.split('\n').map(branch => branch.replace(/^\s+|\s+|origin\/$/g, ''))
+const currentBranch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim()
+const branchList = (await $`git branch -r`).stdout
+  .split('\n')
+  .map(branch => branch.replace(/\s+|\s+|origin\//g, ''))
+
 /**
  * Ask some questions about the release
  */
@@ -30,11 +30,12 @@ const { releaseType, releaseBranch } = await inquirer.prompt([
   {
     type: 'list',
     name: 'releaseBranch',
-    message: 'Which branch to release??',
-    choices: branches,
+    message: 'Which branch to release?',
+    choices: branchList,
     required: true,
-    validate: branch => branches.includes(branch),
-  }
+    default: currentBranch,
+    validate: branch => branchList.includes(branch),
+  },
 ])
 
 const previousReleasedVersion = (
@@ -42,7 +43,6 @@ const previousReleasedVersion = (
 ).stdout.trim()
 
 const previousReleaseName = `Release-${previousReleasedVersion}`
-const currentBranch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim()
 const nextVersion = semverInc(previousReleasedVersion, releaseType)
 const tagName = `Release-${nextVersion}`
 const tagMessage = `FEA-${nextVersion}`
@@ -50,7 +50,7 @@ const tagMessage = `FEA-${nextVersion}`
 /**
  * Fetch all tags from the remote in addition to whatever else would otherwise be fetched.
  */
-await $`git fetch --quiet --tags ${releaseBranch}`
+await $`git fetch --quiet --tags origin ${releaseBranch}`
 
 /**
  * Make sure we are on the release branch.
