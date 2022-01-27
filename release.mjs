@@ -3,25 +3,23 @@ import 'zx/globals'
 import inquirer from 'inquirer'
 import semverInc from 'semver/functions/inc.js'
 
-inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
-
-
 /**
  * Set options for zx.
  */
 $.verbose = false
 $.debug = false
 
-const releaseBranch = 'master'
 const { log } = console
 
 const currentBranch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim()
-const branches = (await $`git branch -r`).stdout.split('\n').map(branch => branch.replace(/^\s+|\s+$/g, ''))
+const branchList = (await $`git branch -r`).stdout
+  .split('\n')
+  .map(branch => branch.replace(/\s+|\s+|origin\//g, ''))
 
 /**
  * Ask some questions about the release
  */
-const { releaseType } = await inquirer.prompt([
+const { releaseType, releaseBranch } = await inquirer.prompt([
   {
     type: 'list',
     name: 'releaseType',
@@ -30,14 +28,14 @@ const { releaseType } = await inquirer.prompt([
     required: true,
   },
   {
-    type: 'input',
+    type: 'list',
     name: 'releaseBranch',
     message: 'Which branch to release?',
-    choices: branches,
+    choices: branchList,
     required: true,
     default: currentBranch,
-    validate: branch => branches.includes(branch),
-  }
+    validate: branch => branchList.includes(branch),
+  },
 ])
 
 const previousReleasedVersion = (
@@ -55,13 +53,6 @@ const tagMessage = `FEA-${nextVersion}`
 await $`git fetch --quiet --tags origin ${releaseBranch}`
 
 /**
- * Make sure we are on the release branch.
- */
-if (currentBranch !== releaseBranch) {
-  exitWithError(`Please switch to the ${releaseBranch} branch before continuing.`)
-}
-
-/**
  * There should be no uncommitted changes.
  */
 if ((await $`git status -s`).stdout.trim()) {
@@ -73,6 +64,13 @@ if ((await $`git status -s`).stdout.trim()) {
  */
 if ((await $`git diff FETCH_HEAD`).stdout.trim()) {
   exitWithError('Local repository contains unpushed commits, abort the release.')
+}
+
+/**
+ * Make sure we are on the release branch.
+ */
+ if (currentBranch !== releaseBranch) {
+   await $`git checkout ${releaseBranch}`
 }
 
 log(`Previous released version: ${chalk.green(previousReleaseName)}`)
